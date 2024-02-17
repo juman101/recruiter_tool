@@ -4,7 +4,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import { readdirSync } from 'fs';
-import mongoose from 'mongoose';
+
 import { fileURLToPath } from 'url';
 import { join, dirname, resolve } from 'path';
 import dotenv from 'dotenv';
@@ -29,16 +29,6 @@ const __dirname = dirname(__filename);
 const app = express();
 
 const csrfProtection = csurf({ cookie: true });
-
-
-mongoose.connect(process.env.mongoAtlasUri, {
-  useNewUrlParser: true,
-  // useFindAndModify: false,
-  useUnifiedTopology:true,
-  // useCreateIndex: true,
-})
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch((error) => console.error('Error connecting to MongoDB Atlas:', error));
 
 // Apply middlewares
 app.use(cors());

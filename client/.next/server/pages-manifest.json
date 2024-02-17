@@ -2,8 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/creator/image/create": "pages/creator/image/create.js",
   "/": "pages/index.js",
   "/user": "pages/user.js",
-  "/creator": "pages/creator.js"
+  "/login": "pages/login.js",
+  "/register": "pages/register.js"
 }

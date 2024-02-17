@@ -1,5 +1,6 @@
 
-import User from "../models/user.js";
+
+import { User } from '../models/pgsql.js';
 import { hashPassword, comparePassword} from "../utils/auth.js";
 import jwt from 'jsonwebtoken';
 import AWS from 'aws-sdk';
@@ -25,64 +26,79 @@ const awsConfig = {
 const SES =new AWS.SES(awsConfig);
 
 
+
 export const register = async (req, res) => {
   try {
-    // console.log(req.body);
     const { name, email, password } = req.body;
-    // validation
+
+    // Validation
     if (!name) return res.status(400).send("Name is required");
     if (!password || password.length < 6) {
       return res
         .status(400)
-        .send("Password is required and should be min 6 characters long");
+        .send("Password is required and should be at least 6 characters long");
     }
-    let userExist = await User.findOne({ email }).exec();
+
+    // Check if the email is already taken
+    const userExist = await User.findOne({ where: { email } });
+
     if (userExist) return res.status(400).send("Email is taken");
 
-    // hash password
+    // Hash password (You need to implement your hashPassword function)
     const hashedPassword = await hashPassword(password);
 
-    // register
-    const user = new User({
+    // Register user
+    const user = await User.create({
       name,
       email,
       password: hashedPassword,
     });
-    await user.save();
-    // console.log("saved user", user);
+
     return res.json({ ok: true });
   } catch (err) {
-    console.log(err);
-    return res.status(400).send("Error. Try again.");
+    console.error(err);
+    return res.status(500).send("Error. Try again.");
   }
 };
 
+
 export const login = async (req, res) => {
   try {
-    // console.log(req.body);
     const { email, password } = req.body;
-    // check if our db has user with that email
-    const user = await User.findOne({ email }).exec();
-    if (!user) return res.status(400).send("No user found");
-    // check password
+
+    // Check if our database has a user with that email
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(400).send("No user found");
+    }
+
+    // Check password
     const match = await comparePassword(password, user.password);
-    // create signed jwt
-    if(!match) return res.status(400).send("wrong password");
-    const token = jwt.sign({ _id: user._id },JWT_SECRET, {
+
+    if (!match) {
+      return res.status(400).send("Wrong password");
+    }
+
+    // Create signed JWT
+    const token = jwt.sign({ _id: user.id }, JWT_SECRET, {
       expiresIn: "7d",
     });
-    // return user and token to client, exclude hashed password
+
+    // Exclude hashed password from user object
     user.password = undefined;
-    // send token in cookie
+
+    // Send token in cookie
     res.cookie("token", token, {
       httpOnly: true,
       // secure: true, // only works on https
     });
-    // send user as json response
+
+    // Send user as a JSON response
     res.json(user);
   } catch (err) {
-    console.log(err);
-    return res.status(400).send("Error. Try again.");
+    console.error(err);
+    return res.status(500).send("Error. Try again.");
   }
 };
 
@@ -97,11 +113,22 @@ export const logout = async (req, res) => {
 
 export const currentUser = async (req, res) => {
   try {
-    const user = await User.findById(req.auth._id).select("-password").exec();
+    const userId = parseInt(req.auth._id, 10); // Convert the ID to an integer
+    const user = await User.findOne({
+      attributes: { exclude: ['password'] },
+      where: { id: userId },
+    });
+    
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     console.log("CURRENT_USER", user);
     return res.json(user);
   } catch (err) {
-    console.log(err);
+    console.error(err);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -208,32 +235,38 @@ console.log(err);
 
 
 
-export const resetpassword=async(req,res)=>
-{
-   try{
-        const{email,code,newpassword} = req.body;
-       // console.log(email,newpassword)
-      
+export const resetpassword = async (req, res) => {
+  try {
+    const { email, code, newpassword } = req.body;
 
-       const hashedPassword=await hashPassword(newpassword);
+    // Hash the new password
 
-       const user =User.findOneAndUpdate({
-        email,
-        passwordResetCode:code,
-       },{password:hashedPassword,
-        passwordResetCode:"",
-      }).exec();
+    const hashedPassword = await hashPassword(newpassword);
 
-res.json({ok: true})
+    // Find the user by email and passwordResetCode and update the password
 
+    const [updatedRows] = await User.update(
+      {
+        password: hashedPassword,
+        passwordResetCode: "",
+      },
+      {
+        where: {
+          email,
+          passwordResetCode: code,
+        },
+      }
+    );
 
-   }
-   catch(err)
-   {
-    console.log(err);
-    return res.status(400).send("error");
-   }
-  
+    // Check if the user was found and updated
 
+    if (updatedRows === 0) {
+      return res.status(400).send("Invalid email or code");
+    }
 
-}
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Error. Try again.");
+  }
+};

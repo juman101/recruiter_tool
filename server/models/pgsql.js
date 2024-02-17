@@ -19,14 +19,6 @@ const User = sequelize.define('user', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  picture: {
-    type: DataTypes.STRING,
-    defaultValue: '/avatar.png',
-  },
-  role: {
-    type: DataTypes.ARRAY(DataTypes.STRING),
-    defaultValue: ['Creator'],
-  },
   passwordResetCode: {
     type: DataTypes.STRING,
     defaultValue: '',
@@ -38,25 +30,32 @@ const Image = sequelize.define('image', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  slug: {
+  email: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  description: {
+  skill: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  category: {
-    type: DataTypes.STRING,
+  salary: {
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
-  published: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
+  nodejsexp: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+ reactjsexp: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
   },
 });
 
 User.hasMany(Image);
 Image.belongsTo(User);
+
+
+
 
 export { User, Image, sequelize };

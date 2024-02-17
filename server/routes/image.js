@@ -2,7 +2,7 @@ import express from "express";
 import formidable from "express-formidable"
 const router = express.Router();
 //middleware
- import { requireSignin, isEnrolled } from "../middlewares/index.js";
+ import { requireSignin } from "../middlewares/index.js";
 
 import {uploadImage, create, read, update,publish ,
     unpublish, images, checkEnrollment, freeEnrollment, userImages} from '../controllers/image.js';
@@ -26,6 +26,6 @@ router.post('/free-enrollment/:imageId',requireSignin,freeEnrollment);
 
 router.get('/user-images', requireSignin,userImages);
 
-router.get("/user/image/:slug",requireSignin,isEnrolled,read);
+router.get("/user/image/:slug",requireSignin,read);
 export default router;
  

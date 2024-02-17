@@ -1,11 +1,11 @@
 import AWS from "aws-sdk"
 import { nanoid } from "nanoid";
-import Image from "../models/image.js";
+import { User, Image } from '../models/pgsql.js';
 import slugify from "slugify";
 import {readFileSync} from'fs' 
 import dotenv from 'dotenv';
 // import { useRouter } from 'next/router';
-import User from "../models/user.js";
+
 dotenv.config();
 
 const awsConfig = {
@@ -150,12 +150,17 @@ export const unpublish = async (req, res) => {
     }
   };
 
-  export const images =async(req,res)=>
-  {
-    const all = await Image.find({published:true}).populate().exec();
-   return  res.json(all);
-
-  }
+  export const images = async (req, res) => {
+    try {
+      // Find all images with published set to true
+      const all = await Image.findAll();
+          if(all)
+      return res.json(all);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
 
   export const checkEnrollment=async (req,res)=>
   {
@@ -205,16 +210,28 @@ export const unpublish = async (req, res) => {
 
 
 
-export const userImages=async(req,res)=>
-{
-  try
-  {
-    const user=await User.findById(req.auth._id).exec();
-    const images=await Image.find({_id:{$in:user.images}})
-    .populate("creator","_id name").exec();
+
+
+export const userImages = async (req, res) => {
+  try {
+    const userId = req.auth._id;
+
+    // Find user by ID
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Find images associated with the user
+    const images = await Image.findAll({
+      where: { UserId: userId }, // Adjust based on your actual foreign key name
+      include: [{ model: User, attributes: ['_id', 'name'] }],
+    });
+
     res.json(images);
-  }catch(err)
-  {
-    console.log(err);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};

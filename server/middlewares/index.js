@@ -8,22 +8,21 @@ export const requireSignin = expressjwt({
   algorithms: ["HS256"],
 });
 
-export const isEnrolled = async (req, res, next) => {
+export const isInstructor = async (req, res, next) => {
   try {
-    const user = await User.findOne({ where: { id: req.auth._id } });
-    const image = await Image.findOne({ where: { slug: req.params.slug } });
+    const user = await User.findOne({
+      where: {
+        id: req.auth._id,
+      }
+    });
 
-    const userImages = await user.getImages(); // Assuming you've set up associations in your models
-
-    const ids = userImages.map(image => image.id); // Extracting ids from user's images
-
-    if (!ids.includes(image.id)) {
-      res.sendStatus(403);
-    } else {
-      next();
+    if (!user) {
+      return res.sendStatus(403); // User is not an instructor, forbidden
     }
+
+    next(); // User is an instructor, proceed to the next middleware or route handler
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.sendStatus(500); // Internal Server Error
   }
 };
