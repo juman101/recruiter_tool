@@ -1,51 +1,36 @@
 import { User, Image } from '../models/pgsql.js';
-import dotenv from 'dotenv';
-
-
-dotenv.config();
-
-
-
+// controllers/creator.js
 
 
 export const currentCreator = async (req, res) => {
   try {
-    const userId = req.auth._id;
-
-    // Find the user by ID, exclude the password field
-    const user = await User.findOne({
-      attributes: { exclude: ['password'] },
-      where: { id: userId },
-    });
-
+    const userId = req.user.id; // Assuming the user ID is stored in the req.user object
+    
+    // console.log("i reached currentcreator in controllers")
+    // console.log(req.user)
+    const user = await User.findByPk(userId);
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
-
-    console.log("good here");
-    res.json({ ok: true });
+    // console.log("bro it got completed till here as well")
+    return res.status(200).json({ user });
   } catch (err) {
-    console.error("woah error was here");
-    console.error(err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.log("bhai sahab yha error hai ")
+    console.error("Current creator error:", err);
+    return res.status(500).send("Internal Server Error");
   }
 };
 
 export const creatorImages = async (req, res) => {
   try {
-    const userId = req.auth._id;
-
-    // Find images associated with the creator ID
-
-    const images = await Image.findAll({
-        where: { UserId: userId },
-        order: [['createdAt', 'DESC']],
-      });
-
-    res.json(images);
+    console.log("woah")
+    const userId = req.user.id; // Assuming the user ID is stored in the req.user object
+    // return;
+    console.log("helloji")
+    const images = await Image.findAll({ where: { creatorId: userId }, order: [['createdAt', 'DESC']] });
+    return res.json(images);
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Creator images error:", err);
+    return res.status(503).send("Internal Server Error");
   }
 };
-

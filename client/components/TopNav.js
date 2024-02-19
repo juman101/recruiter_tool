@@ -80,6 +80,8 @@ const TopNav = () => {
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+
+      
       <div>
         <Link href="/">
           <p style={activeButton == '/' ? activeButtonStyle : buttonStyle}>
@@ -101,7 +103,7 @@ const TopNav = () => {
           <Link href="/creator">
             <p style={activeButton == '/creator' ? activeButtonStyle : buttonStyle}>
               <FontAwesomeIcon icon={faChalkboardTeacher} style={{ marginRight: '5px' }} />
-              Manage Candidate
+              Candidate Management
             </p>
           </Link>
         )}
@@ -115,7 +117,7 @@ const TopNav = () => {
               onClick={toggleDropdown}
             >
               <FontAwesomeIcon icon={faUser} style={{ marginRight: '5px' }} />
-              <span>{state.user.name}</span>
+              <span>{state.user.user.name}</span>
             </p>
             {showDropdown && (
               <div

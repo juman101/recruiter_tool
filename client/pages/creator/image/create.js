@@ -5,6 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import ImageCreateForm from "../../../components/forms/ImageCreateForm.js";
 import CreatorRoute from "../../../components/routes/CreatorRoute.js";
+import UserRoute from "../../../components/routes/UserRoute.js";
 import Resizer from 'react-image-file-resizer';
 import { toast } from "react-toastify";
 
@@ -14,14 +15,21 @@ const ImageCreate = () => {
   const [values, setValues] = useState({
     name: "",
     description: "",
+    email: "",
+    phone: "",
+    expectedSalary: "",
+    currentStatus: "",
+    nodejsExperience: "",
+    reactjsExperience: "",
     uploading: false,
-    price: "0",
     loading: false,
   });
   const [image, setImage] = useState({});
   const [preview, setPreview] = useState("");
   const [uploadButtonText, setUploadButtonText] = useState("Upload Image");
 
+  
+  
   const handleImage = (e) => {
     let file = e.target.files[0];
     setPreview(window.URL.createObjectURL(file));
@@ -31,6 +39,7 @@ const ImageCreate = () => {
     // Resize
     Resizer.default.imageFileResizer(file, 720, 500, "JPEG", 100, 0, async (uri) => {
       try {
+        console.log("image uploader reached here")
         let { data } = await axios.post("/api/image/upload-image", {
           image: uri,
         });
@@ -53,10 +62,12 @@ const ImageCreate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log("yes i reached here")
       const { data } = await axios.post("/api/image", {
         ...values,
         image,
       });
+
       toast("Great image is created");
       router.push("/creator");
     } catch (err) {
@@ -67,7 +78,7 @@ const ImageCreate = () => {
 
   return (
     <CreatorRoute>
-      <h1 className="jumbotron text-center bg-primary square">Create Image</h1>
+      <h1 style={{ textAlign: "center", background: "#000000", color: "#fff", padding: "20px" }}>Candidate Information</h1>
       <div className="pt-3 pb-3">
         <ImageCreateForm
           handleChange={handleChange}

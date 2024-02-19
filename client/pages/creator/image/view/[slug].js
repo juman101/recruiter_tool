@@ -91,7 +91,7 @@ const ImageView = () => {
                     color: image.published ? '#4caf50' : '#d9534f', // Green if published, Red if not
                     fontSize: '20px',
                   }}
-                  onClick={(e) => (image.published ? handleUnpublish(e, image._id) : handlePublish(e, image._id))}
+                  onClick={(e) => (image.published ? handleUnpublish(e, image.id) : handlePublish(e, image.id))}
                 />
               </div>
             </div>

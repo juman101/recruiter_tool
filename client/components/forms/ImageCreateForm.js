@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 const ImageCreateForm = ({
   values,
   handleChange,
@@ -7,7 +8,6 @@ const ImageCreateForm = ({
   handleImage,
   preview, 
   uploadButtonText,
-  // handleImageRemove,
   editPage = false,
 }) => {
   const [buttonValue, setButtonValue] = useState('Save & Continue');
@@ -16,77 +16,113 @@ const ImageCreateForm = ({
     <>
     {values && (
       <form onSubmit={handleSubmit}>
-       <div className="form-group mb-3">
+      <div className="form-group mb-3">
+        <input
+          type="text"
+          name="name"
+          className="form-control"
+          placeholder="Name"
+          value={values.name}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="form-group mb-3">
+        <input
+          type="text"
+          name="email"
+          className="form-control"
+          placeholder="Email"
+          value={values.email}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="form-group mb-3">
+        <input
+          type="text"
+          name="phone"
+          className="form-control"
+          placeholder="Phone"
+          value={values.phone}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="form-group mb-3">
+        <textarea
+          name="description"
+          cols="7"
+          rows="7"
+          placeholder="Description"
+          value={values.description}
+          className="form-control"
+          onChange={handleChange}
+        ></textarea>
+      </div>
+      
+      <div className="form-group mb-3">
+        <input
+          type="text"
+          name="category"
+          className="form-control"
+          placeholder="Category"
+          value={values.category}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="form-group mb-3">
             <input
               type="text"
-              name="name"
-              className="form-control"
-              placeholder="Candidate Name"
-              value={values.name}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="form-group mb-3">
-            <input
-              type="email"
-              name="email" // Updated name attribute
-              className="form-control"
-              placeholder="Candidate Email"
-              value={values.email} // Updated state value
-              onChange={handleChange}
-            />
-          </div>
-          <div className="form-group mb-3">
-            <textarea
-              name="description" // Updated name attribute
-              cols="7"
-              rows="7"
-              placeholder="Skills"
-              value={values.description}
-              className="form-control"
-              onChange={handleChange}
-            ></textarea>
-          </div>
-          <div className="form-group mb-3">
-            <input
-              type="number"
-              name="salary" // Updated name attribute
+              name="expectedSalary"
               className="form-control"
               placeholder="Expected Salary"
-              value={values.salary} // Updated state value
+              value={values.expectedSalary}
               onChange={handleChange}
             />
+          </div> 
+          <div className="form-group mb-3">
+            <label>Current Status:</label>
+            <select
+              name="currentStatus"
+              className="form-control"
+              value={values.currentStatus}
+              onChange={handleChange}
+            >
+              <option value="">Select Status</option>
+              <option value="Listed">Listed</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Interview Scheduled">Interview Scheduled</option>
+              <option value="Offer Extended">Offer Extended</option>
+              <option value="Hired">Hired</option>
+              <option value="Rejected">Rejected</option>
+            </select>
           </div>
           <div className="form-group mb-3">
-  <label htmlFor="nodeJsExperience">Node.js Experience</label>
-  <select
-    id="nodeJsExperience"
-    name="nodeJsExperience"
-    className="form-control"
-    value={values.nodeJsExperience}
-    onChange={handleChange}
-  >
-    <option value="Less than 1 year">Less than 1 year</option>
-    <option value="1-2 years">1-2 years</option>
-    <option value="Over 2 years">Over 2 years</option>
-  </select>
-</div>
-
-<div className="form-group mb-3">
-  <label htmlFor="ReactJsexperience">React Experience</label>
-  <select
-    id="ReactJsexperience"
-    name="ReactJsexperience"
-    className="form-control"
-    value={values.nodeJsExperience}
-    onChange={handleChange}
-  >
-    <option value="Less than 1 year">Less than 1 year</option>
-    <option value="1-2 years">1-2 years</option>
-    <option value="Over 2 years">Over 2 years</option>
-  </select>
-</div>
-
+            <label>Node.js Experience:</label>
+            <select
+              name="nodejsExperience"
+              className="form-control"
+              value={values.nodejsExperience}
+              onChange={handleChange}
+            >
+              <option value="">Select Node.js Experience</option>
+              <option value="Less than 1 year">Less than 1 year</option>
+              <option value="1-2 years">1-2 years</option>
+              <option value="Over 2 years">Over 2 years</option>
+            </select>
+          </div>
+          <div className="form-group mb-3">
+            <label>ReactJS Experience:</label>
+            <select
+              name="reactjsExperience"
+              className="form-control"
+              value={values.reactjsExperience}
+              onChange={handleChange}
+            >
+              <option value="">Select ReactJS Experience</option>
+              <option value="Less than 1 year">Less than 1 year</option>
+              <option value="1-2 years">1-2 years</option>
+              <option value="Over 2 years">Over 2 years</option>
+            </select>
+          </div>
       <div className="form-row mb-3">
         <div className="col">
           <div className="form-group">

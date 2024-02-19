@@ -4,14 +4,16 @@ import TopNav from "../components/TopNav";
 import {ToastContainer} from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 import { Provider } from "../context";
+import Footer from "../components/Footer/Footer.js";
 
 function MyApp({Component,pageProps})
 {
     return (
       <Provider> 
         <ToastContainer position="top-center"/>
-        <TopNav/>
+        <TopNav position="fixed"/>
         <Component {...pageProps}/>
+        <Footer />
       </Provider>
     );
 }

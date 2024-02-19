@@ -10,14 +10,17 @@ const CreatorRoute = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
+    console.log("this useeffect worked")
     fetchCreator();
   }, []);
 
   const fetchCreator = async () => {
     try {
+      console.log("oh my god")
       const { data } = await axios.get("/api/current-creator");
-      //   console.log(data);
-      if (data.ok) setOk(true);
+      console.log("woah ")
+        console.log(data);
+      if (!data.ok) setOk(true);
     } catch (err) {
       console.log("yeah error is here")
       console.log(err);

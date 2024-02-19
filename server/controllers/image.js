@@ -1,33 +1,29 @@
-import AWS from "aws-sdk"
-import { nanoid } from "nanoid";
-import { User, Image } from '../models/pgsql.js';
-import slugify from "slugify";
-import {readFileSync} from'fs' 
-import dotenv from 'dotenv';
-// import { useRouter } from 'next/router';
+// controllers/image.js
 
-dotenv.config();
+import AWS from "aws-sdk";
+import { nanoid } from "nanoid";
+import slugify from "slugify";
+
+import { findAllPublishedImagesQuery, checkEnrollmentStatusQuery, enrollImageQuery, getUserImagesQuery } from '../controllers/queries.js';
+import {sequelize ,User, Image } from '../models/pgsql.js';
+import { QueryTypes } from 'sequelize';
 
 const awsConfig = {
-    accessKeyId: process.env.AWS_ACCESS_KEY,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     region: process.env.AWS_REGION,
     apiVersion: process.env.AWS_API_VERSION,
 };
 
-const S3 = new AWS.S3(awsConfig);
-
+const s3 = new AWS.S3(awsConfig);
 
 export const uploadImage = async (req, res) => {
-    try{
+    try {
+        // console.log("reached upload image n controllers")
         const { image } = req.body;
-        if(!image) return res.status(400).send("No image");
+        if (!image) return res.status(400).send("No image");
 
-        //prepare the image
-        const base64Data = new Buffer.from(
-            image.replace(/^data.image\/\w+;base64,/, ""),
-            "base64"
-        );
+        const base64Data = Buffer.from(image.replace(/^data:image\/\w+;base64,/, ""), "base64");
         const type = image.split(",")[0].split("/")[1];
 
         const params = {
@@ -39,199 +35,186 @@ export const uploadImage = async (req, res) => {
             ContentType: `image/${type}`,
         };
 
-        // upload to S3
-        S3.upload(params, (err, data) => {
-            if(err){
+        s3.upload(params, (err, data) => {
+            if (err) {
                 console.log(err);
                 return res.sendStatus(400);
             }
             console.log(data);
-            res.send(data);
+            return res.send(data);
         });
     } catch (err) {
         console.log(err);
+        console.log("error occured in this block")
+        return res.status(500).send("Internal Server Error");
     }
-}
+};
 
 export const create = async (req, res) => {
-    // console.log(req.body.name.toLowerCase());
-    // return;
     try {
-        const alreadyExist = await Image.findOne({
-            slug: slugify(req.body.name.toLowerCase()),
+        console.log("i reached create")
+        const { name, email, phone, expectedSalary, description, currentStatus, nodejsExperience,reactjsExperience, category, score, image} = req.body;
+        const slug = slugify(name.toLowerCase());
+        console.log("ok so here is the error")
+        console.log(req.body)
+        console.log(req.user)
+        const imagei = await Image.create({
+            name: req.body.name, email: req.body.email, phone: req.body.phone, expectedSalary: req.body.expectedSalary, description: req.body.description, currentStatus: req.body.currentStatus, nodejsExperience: req.body.nodejsExperience,reactjsExperience: req.body.reactjsExperience, category: req.body.category,  score:req.body.score,
+            image: req.body.image, slug,
+            creatorId: req.user.id,
         });
-        if(alreadyExist) return res.status(400).send("Title is taken");
-        console.log(req.auth._id);
-        const image = await new Image({
-            slug: slugify(req.body.name),
-            creator: req.auth._id,
-            ...req.body,
-        }).save();
-        
-        res.json(image);
-    } catch(err) {
-        console.log(err); 
-        return res.status(400).send("Image create failed. Try again!")
-    }
-}
-
-export const read = async (req, res) => {
-    try{
-        const image = await Image.findOne({ slug: req.params.slug})
-        .populate("creator", "_id name")
-        .exec();
-        res.json(image);
+        console.log("yes this error is fixed")
+        return res.json(imagei);
     } catch (err) {
         console.log(err);
+        return res.status(500).send("Internal Server Error");
     }
-}
+};
 
-
-
-export const update = async (req, res) =>{
-    try{
+export const read = async (req, res) => {
+    try {
         const { slug } = req.params;
-        const image = await Image.findOne({ slug }).exec();
-        if(req.auth._id != image.creator){
-            return res.status(400).send("Unauthorized");
-        } 
-        const updated = await Image.findOneAndUpdate({ slug }, req.body, {
-            new: true,
-        }).exec();
-        res.json(updated);
-    } catch(err){
+        const image = await Image.findOne({ where: { slug } });
+        if (!image) return res.status(404).json({ message: "Image not found" });
+        return res.json(image);
+    } catch (err) {
         console.log(err);
-        return res.status(400).send(err.message);
+        return res.status(500).send("Internal Server Error");
     }
-} 
+};
+
+export const update = async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const { name, description, category } = req.body;
+        const updatedImage = await Image.update(
+            { name, description, category },
+            { where: { slug }, returning: true }
+        );
+        return res.json(updatedImage[1][0]);
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send("Internal Server Error");
+    }
+};
 
 export const publish = async (req, res) => {
-
     try {
-        console.log("Incoming request:", req.body);
         const { imageId } = req.params;
+        const image = await Image.findByPk(imageId);
+        if (!image) return res.status(404).json({ message: "Image not found" });
+        if (image.creatorId !== req.user.id) return res.status(403).json({ message: "Unauthorized" });
 
-        const image = await Image.findById(imageId).select('creator').exec();
-
-        if (image.creator._id != req.auth._id) {
-            return res.status(400).send("unauthorized");
-        }
-
-        const updated = await Image.findByIdAndUpdate(
-            imageId,
-            { published: true },
-            { new: true }
-        ).exec();
-
-        return res.status(200).json(updated);
-    }
-    catch (err) {
+        const updatedImage = await Image.update({ published: true }, { where: { id: imageId }, returning: true });
+        return res.json(updatedImage[1][0]);
+    } catch (err) {
         console.log(err);
-        return res.status(400).send("publish-fails");
+        return res.status(500).send("Internal Server Error");
     }
-}
-
+};
 
 export const unpublish = async (req, res) => {
     try {
-      const { imageId } = req.params;
-      const image = await Image.findById(imageId).select('creator').exec();
-   
-      if (image.creator._id != req.auth._id) {
-        return res.status(400).send('Unauthorized');
-      }
-   
-      const updated = await Image.findByIdAndUpdate(imageId, { published: false }, { new: true }).exec();
-   
-      return res.status(200).json(updated);
-    } catch (err) {
-      console.log(err);
-      return res.status(400).send('Unpublish image failed');
-    }
-  };
+        const { imageId } = req.params;
+        const image = await Image.findByPk(imageId);
+        if (!image) return res.status(404).json({ message: "Image not found" });
+        if (image.creatorId !== req.user.id) return res.status(403).json({ message: "Unauthorized" });
 
-  export const images = async (req, res) => {
+        const updatedImage = await Image.update({ published: false }, { where: { id: imageId }, returning: true });
+        return res.json(updatedImage[1][0]);
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send("Internal Server Error");
+    }
+};
+
+export const images = async (req, res) => {
     try {
-      // Find all images with published set to true
-      const all = await Image.findAll();
-          if(all)
-      return res.json(all);
+        const allImages = await findAllPublishedImagesQuery();
+        return res.json(allImages);
     } catch (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Internal Server Error' });
+        console.log(err);
+        return res.status(500).send("Internal Server Error");
     }
-  };
+};
 
-  export const checkEnrollment=async (req,res)=>
-  {
-    try
-    {
-        console.log("hello ji");
-      const {imageId}=req.params;
-      const user= await User.findById(req.auth._id).exec();
-      let ids=[];
-      let length=user.images && user.images.length;
-      if(user.images){
-      for(let i=0;i<user.images.length;i++)
-      {
-        ids.push(user.images[i].toString())
-      }
-      }
-      res.json({
-        status:ids.includes(imageId),
-        image:await Image.findById(imageId).exec()
-      })
-    }catch(err)
-    {
-      console.log("bro");
+export const checkEnrollment = async (req, res) => {
+    try {
+        const { imageId } = req.params;
+        const isEnrolled = await checkEnrollmentStatusQuery(req.user.id, imageId);
+        return res.json({ status: isEnrolled });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send("Internal Server Error");
     }
-  }
+};
 
-  export const freeEnrollment=async(req,res)=>
-{
-  try
-  {
-    
-  const image=await Image.findById(req.params.imageId).exec();
-  const result=await User.findByIdAndUpdate(req.auth._id,
-    {
-      $addToSet:{images:image._id},
-    },{new:true}).exec();
-    
-    res.json({message:"Congratulations! You have successfully saved an image",
-      image})
-  }catch(err)
-  {
-    console.log(err);
-    return res.status(400).send("save failed");
-  }
-}
+export const freeEnrollment = async (req, res) => {
+    try {
+        const { imageId } = req.params;
 
+        // Find the image by ID
+        const image = await Image.findByPk(imageId);
 
+        if (!image) {
+            return res.status(404).json({ message: "Image not found" });
+        }
 
+        // Add the enrolled image to the user's saved images
+        const user = await User.findByPk(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
+        // Ensure that user.savedImages is an array before using map
+        user.savedImages = user.savedImages || [];
+
+        // Check if the image already exists in saved images to avoid duplication
+        const savedImagesIds = user.savedImages.map(savedImage => savedImage.id);
+
+        if (!savedImagesIds.includes(image.id)) {
+            // Extract the ID from the Sequelize instance before adding it to saved images array
+            const imageIdToAdd = image.id;
+            
+            // Add the image ID to saved images array
+            await user.update({ savedImages: [...user.savedImages, imageIdToAdd] });
+
+            return res.json({ message: "Enrollment successful" });
+        } else {
+            return res.json({ message: "Image already enrolled" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send("Internal Server Error");
+    }
+};
 
 
 export const userImages = async (req, res) => {
-  try {
-    const userId = req.auth._id;
+    try {
+        // Find the user by ID
+        const user = await User.findByPk(req.user.id);
 
-    // Find user by ID
-    const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+        // Retrieve the saved images array from the user's record
+        const savedImages = user.savedImages || [];
+
+       
+        // Find all corresponding images using the Image model
+        const imageIds = savedImages
+        console.log(imageIds);
+        // Find all corresponding images using the Image model
+        const correspondingImages = await Image.findAll({
+            where: { id: imageIds }
+        });
+
+        console.log(correspondingImages);
+        return res.json(correspondingImages);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send("Internal Server Error");
     }
-
-    // Find images associated with the user
-    const images = await Image.findAll({
-      where: { UserId: userId }, // Adjust based on your actual foreign key name
-      include: [{ model: User, attributes: ['_id', 'name'] }],
-    });
-
-    res.json(images);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Internal Server Error' });
-  }
 };

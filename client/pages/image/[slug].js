@@ -20,7 +20,7 @@ const SingleImage = ({ image }) => {
 
   const checkEnrollment=async ()=>
   {
-      const {data}=await axios.get(`/api/check-enrollment/${image._id}`);
+      const {data}=await axios.get(`/api/check-enrollment/${image.id}`);
       // console.log(data);
       setEnrolled(data);
   }
@@ -32,7 +32,7 @@ const handleFreeEnrollment=async (e)=>
 
         if(enrolled.status) return router.push(`/user/image/${enrolled.image.slug}`);
         setLoading(true);
-        const {data}=await axios.post(`/api/free-enrollment/${image._id}`);
+        const {data}=await axios.post(`/api/free-enrollment/${image.id}`);
         toast(data.message);
         setLoading(false);
         setEnrolled(data);

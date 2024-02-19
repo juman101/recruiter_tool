@@ -61,7 +61,7 @@ const Login = () => {
 
   return (
     <>
-      <h1 className="jumbotron text-center bg-primary square">Login Page</h1>
+      <h1 style={{ textAlign: "center", background: "#000000", color: "#fff", padding: "20px" }}>Login Page</h1>
 
       <div className="container col-md-4 offset-md-4 pb-4">
         <form onSubmit={handleSubmit}>

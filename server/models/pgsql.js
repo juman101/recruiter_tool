@@ -1,61 +1,105 @@
 import { DataTypes, Sequelize } from 'sequelize';
 
-const sequelize = new Sequelize('User', 'juman', 'juman', {
+const sequelize = new Sequelize('taskphin', 'juman', 'juman', {
   host: 'localhost',
   dialect: 'postgres',
 });
 
-const User = sequelize.define('user', {
+const User = sequelize.define('User', {
   name: {
     type: DataTypes.STRING,
     allowNull: false,
+    trim: true,
   },
   email: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
+    trim: true,
   },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  picture: {
+    type: DataTypes.STRING,
+    defaultValue: '/avatar.png',
+  },
+  role: {
+    type: DataTypes.ARRAY(DataTypes.STRING),
+    defaultValue: ['Creator'],
+  },
   passwordResetCode: {
     type: DataTypes.STRING,
     defaultValue: '',
   },
+  savedImages: {
+    type: DataTypes.ARRAY(DataTypes.INTEGER), // Array of Image IDs
+    defaultValue: [],
+  },
+}, {
+  tableName: 'User',
 });
 
-const Image = sequelize.define('image', {
+const Image = sequelize.define('Image', {
   name: {
     type: DataTypes.STRING,
     allowNull: false,
+    trim: true,
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: true,
+    trim: true,
   },
-  skill: {
+  phone: {
+    type: DataTypes.STRING,
+  },
+  expectedSalary: {
+    type: DataTypes.STRING,
+  },
+  slug: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    lowercase: true,
+  },
+  description: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  salary: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
+  currentStatus: {
+    type: DataTypes.STRING,
   },
-  nodejsexp: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
+  nodejsExperience: {
+    type: DataTypes.STRING,
   },
- reactjsexp: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
+  reactjsExperience: {
+    type: DataTypes.STRING,
   },
+  image: {
+    type: [DataTypes.JSONB],
+  },
+  category: {
+    type: DataTypes.STRING,
+  },
+  published: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  score: {
+    type: DataTypes.INTEGER,
+  },
+  creatorId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: User,
+    },
+  },
+}, {
+  tableName: 'Image'
 });
 
-User.hasMany(Image);
-Image.belongsTo(User);
-
-
-
-
+// Define the association with the User model
+Image.belongsTo(User, { foreignKey: 'creatorId' }); // Assuming creatorId is the foreign key in the Image model
 export { User, Image, sequelize };
