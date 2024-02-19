@@ -1,8 +1,16 @@
 import { DataTypes, Sequelize } from 'sequelize';
-
-const sequelize = new Sequelize('taskphin', 'juman', 'juman', {
-  host: 'localhost',
+import dotenv from 'dotenv';
+dotenv.config();
+console.log(process.env.DB_CONNECTION_URL);
+const sequelize = new Sequelize(process.env.DB_CONNECTION_URL, {
   dialect: 'postgres',
+  ssl: true, // Enable SSL for secure connection (Render PostgreSQL requires SSL)
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false // Disable SSL verification (necessary for some setups)
+    }
+  }
 });
 
 const User = sequelize.define('User', {

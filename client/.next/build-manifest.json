@@ -37,10 +37,20 @@
       "static/chunks/main.js",
       "static/chunks/pages/creator/image/create.js"
     ],
-    "/user": [
+    "/creator/image/view/[slug]": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/user.js"
+      "static/chunks/pages/creator/image/view/[slug].js"
+    ],
+    "/image/[slug]": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/image/[slug].js"
+    ],
+    "/register": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/register.js"
     ]
   },
   "ampFirstPages": []
