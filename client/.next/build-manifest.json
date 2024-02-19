@@ -27,30 +27,15 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/creator": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/creator.js"
-    ],
     "/creator/image/create": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/creator/image/create.js"
     ],
-    "/creator/image/view/[slug]": [
+    "/login": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/creator/image/view/[slug].js"
-    ],
-    "/image/[slug]": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/image/[slug].js"
-    ],
-    "/register": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/register.js"
+      "static/chunks/pages/login.js"
     ]
   },
   "ampFirstPages": []

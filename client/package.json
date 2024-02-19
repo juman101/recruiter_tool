@@ -8,7 +8,8 @@
     "dev": "node server.js",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "proxy": "http://localhost:3000"
   },
   "author": "",
   "license": "ISC",
