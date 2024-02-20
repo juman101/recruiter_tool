@@ -75,6 +75,6 @@ You can use a PostgreSQL database provided by render.com. Set up your database a
 - AWS-S3
 
 ## Future Scope
-- creating separate role based access and authorization for candidates and recruiters
-- creating further criterias and grading points to categorise candidates
-- faster search agorithm for search box in global showcase
+- auto score calculation from uploaded by parsing pdf
+- generating score for specific job using open ai
+- improving the dashboard and introducing more analytical features 
