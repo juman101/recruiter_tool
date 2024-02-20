@@ -1,7 +1,6 @@
 # Recruitment Tool
 
-Recruitment Assistance is an all-purpose recruitment solution designed to streamline the hiring process for both job seekers and recruiters.
-It offers a comprehensive platform for managing candidates, evaluating their skills, and tracking their progress through different stages of recruitment.
+Recruitment tool is an all-purpose recruitment solution designed to streamline the hiring process for  recruiters.
 
 
 ## video demo 
