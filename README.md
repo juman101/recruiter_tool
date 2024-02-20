@@ -4,6 +4,10 @@ Recruitment Assistance is an all-purpose recruitment solution designed to stream
 It offers a comprehensive platform for managing candidates, evaluating their skills, and tracking their progress through different stages of recruitment.
 
 
+## video demo 
+
+https://www.youtube.com/watch?v=NWDt0S0iXLs
+
 ## Features
 
 - **Global Candidate Showcase**: Job seekers can create profiles to showcase their skills and qualifications, increasing their visibility to recruiters from various organizations worldwide. Candidates can put up their profiles without logging in.
